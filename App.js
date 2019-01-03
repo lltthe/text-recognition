@@ -1,37 +1,46 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Alert,
   Image, TouchableOpacity, NativeModules, Dimensions, Button
 } from 'react-native';
 
+import ActionButton from 'react-native-action-button';
+import IconIon from 'react-native-vector-icons/Ionicons';
+import IconMaterial from 'react-native-vector-icons/MaterialIcons';
 import Video from 'react-native-video';
+import DialogInput from 'react-native-dialog-input';
 
 var ImagePicker = NativeModules.ImageCropPicker;
 
 const styles = StyleSheet.create({
+  actionButtonIcon: {
+    fontSize: 24,
+    height: 25,
+    color: 'white',
+  },
   container: {
     flex: 1,
-	margin: 5,
+    margin: 5,
     justifyContent: 'center',
     alignItems: 'center'
   },
-  button: {
-    marginBottom: 10
-  },
   text: {
-    color: 'blue',
-    fontSize: 20,
-    textAlign: 'center'
+    color: 'black',
+    fontSize: 10,
+    textAlign: 'center',
+    marginBottom: 10,
+    marginTop: 5
   }
 });
 
 export default class App extends Component {
-
   constructor() {
     super();
     this.state = {
       image: null,
-      images: null
+      images: null,
+      apiIp: '192.168.2.130',
+      showApiIpDialog: false
     };
   }
 
@@ -44,7 +53,7 @@ export default class App extends Component {
     }).then(image => {
       console.log('received image', image);
       this.setState({
-        image: {uri: image.path, width: image.width, height: image.height},
+        image: { uri: image.path, width: image.width, height: image.height },
         images: null
       });
     }).catch(e => alert(e));
@@ -53,10 +62,10 @@ export default class App extends Component {
   cleanupImages() {
     ImagePicker.clean().then(() => {
       console.log('removed tmp images from tmp directory');
-	  this.setState({
-		image: null,
-		images: null
-	  });
+      this.setState({
+        image: null,
+        images: null
+      });
     }).catch(e => {
       alert(e);
     });
@@ -74,7 +83,7 @@ export default class App extends Component {
     }).then(image => {
       console.log('received cropped image', image);
       this.setState({
-        image: {uri: image.path, width: image.width, height: image.height, mime: image.mime},
+        image: { uri: image.path, width: image.width, height: image.height, mime: image.mime },
         images: null
       });
     }).catch(e => {
@@ -83,7 +92,7 @@ export default class App extends Component {
     });
   }
 
-  pickSingle(cropit, circular=false) {
+  pickSingle(cropit, circular = false) {
     ImagePicker.openPicker({
       width: 500,
       height: 100,
@@ -97,7 +106,7 @@ export default class App extends Component {
     }).then(image => {
       console.log('received image', image);
       this.setState({
-        image: {uri: image.path, width: image.width, height: image.height, mime: image.mime},
+        image: { uri: image.path, width: image.width, height: image.height, mime: image.mime },
         images: null
       });
     }).catch(e => {
@@ -117,38 +126,43 @@ export default class App extends Component {
         image: null,
         images: images.map(i => {
           console.log('received image', i);
-          return {uri: i.path, width: i.width, height: i.height, mime: i.mime};
+          return { uri: i.path, width: i.width, height: i.height, mime: i.mime };
         })
       });
     }).catch(e => alert(e));
   }
-  
+
   scaledHeight(oldW, oldH, newW) {
     return (oldH / oldW) * newW;
   }
 
+  selectApiIp() {
+    this.setState({ showApiIpDialog: true });
+  }
+
   renderVideo(video) {
-    return (<View style={{height: 300, width: 300}}>
-      <Video source={{uri: video.uri, type: video.mime}}
-         style={{position: 'absolute',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            right: 0
-          }}
-         rate={1}
-         paused={false}
-         volume={1}
-         muted={false}
-         resizeMode={'cover'}
-         onError={e => console.log(e)}
-         onLoad={load => console.log(load)}
-         repeat={true} />
-     </View>);
+    return (<View style={{ height: 300, width: 300 }}>
+      <Video source={{ uri: video.uri, type: video.mime }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0
+        }}
+        rate={1}
+        paused={false}
+        volume={1}
+        muted={false}
+        resizeMode={'cover'}
+        onError={e => console.log(e)}
+        onLoad={load => console.log(load)}
+        repeat={true} />
+    </View>);
   }
 
   renderImage(image) {
-    return <Image style={{width: 300, height: 300, resizeMode: 'contain'}} source={image} />
+    return <Image style={{ width: 300, height: 300, resizeMode: 'contain' }} source={image} />
   }
 
   renderAsset(image) {
@@ -165,37 +179,54 @@ export default class App extends Component {
         {this.state.image ? this.renderAsset(this.state.image) : null}
         {this.state.images ? this.state.images.map(i => <View key={i.uri}>{this.renderAsset(i)}</View>) : null}
       </ScrollView>
-
-      <TouchableOpacity onPress={() => this.pickSingleWithCamera(false)} style={styles.button}>
-        <Text style={styles.text}>Select Single With Camera</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => this.pickSingleWithCamera(true)} style={styles.button}>
-        <Text style={styles.text}>Select Single With Camera With Cropping</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => this.pickSingle(false)} style={styles.button}>
-        <Text style={styles.text}>Select Single</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => this.pickSingle(true)} style={styles.button}>
-        <Text style={styles.text}>Select Single With Cropping</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => this.pickSingle(true, true)} style={styles.button}>
-        <Text style={styles.text}>Select Single With Circular Cropping</Text>
-      </TouchableOpacity>	  
-      <TouchableOpacity onPress={() => this.cropLast()} style={styles.button}>
-        <Text style={styles.text}>Crop Last Selected Image</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={this.pickMultiple.bind(this)} style={styles.button}>
-        <Text style={styles.text}>Select Multiple</Text>
-      </TouchableOpacity>	  
-      <TouchableOpacity onPress={this.cleanupImages.bind(this)} style={styles.button}>
-        <Text style={styles.text}>Cleanup</Text>
-      </TouchableOpacity>
-	  <Button
-		onPress={() => {
-			Alert.alert("Result", Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
-		}}
-		title="Perform Recognition"
-		/>
+      <DialogInput isDialogVisible={this.state.showApiIpDialog}
+        title={'API IP Config'}
+        message={"Input the API's IP address:"}
+        hintInput={'xxx.xxx.xxx.xxx'}
+        initValueTextInput={this.state.apiIp}
+        submitInput={(inputText) => { this.setState({ apiIp: inputText, showApiIpDialog: false }) }}
+        closeDialog={() => { this.setState({ showApiIpDialog: false }) }}>
+      </DialogInput>
+      <ActionButton buttonColor="rgba(231,76,60,1)" offsetY={50} offsetX={25}>
+        <ActionButton.Item buttonColor='#9b59b6' title='From camera' onPress={() => this.pickSingleWithCamera(true)}>
+          <IconIon name='md-camera' style={styles.actionButtonIcon} />
+        </ActionButton.Item>
+        <ActionButton.Item buttonColor='#1abc9c' title='From file' onPress={() => this.pickSingle(false)}>
+          <IconIon name='md-image' style={styles.actionButtonIcon} />
+        </ActionButton.Item>
+        <ActionButton.Item buttonColor='#3498db' title='From multiple files' onPress={() => this.pickMultiple()}>
+          <IconIon name='md-images' style={styles.actionButtonIcon} />
+        </ActionButton.Item>
+        <ActionButton.Item buttonColor='#ef6c00' title='Crop last selected' onPress={() => this.cropLast()}>
+          <IconIon name='md-crop' style={styles.actionButtonIcon} />
+        </ActionButton.Item>
+        <ActionButton.Item buttonColor='#546e7a' title='Clean all' onPress={() => this.cleanupImages()}>
+          <IconMaterial name='delete' style={styles.actionButtonIcon} />
+        </ActionButton.Item>
+        <ActionButton.Item buttonColor='#007c91' title="Set API's IP" onPress={() => this.selectApiIp()}>
+          <IconIon name='md-build' style={styles.actionButtonIcon} />
+        </ActionButton.Item>
+      </ActionButton>
+      <Button
+        onPress={() => {
+         /* RNFetchBlob.config({
+            trusty: true
+          })
+            .fetch('POST', 'https://' + this.state.apiIp + '/api/ocr', {
+              'Content-Type': 'multipart/form-data'
+            }, [
+                { name: 'data', filename: 'data.jpg', type: 'image/foo', data: RNFetchBlob.wrap(this.state.image) }
+              ]).then((resp) => {
+              }).catch((err) => {
+              })
+			  */
+        }}
+        title="Perform Recognition"
+      />
+      <Text
+        style={styles.text}>
+        {"Current API's IP: "}{this.state.apiIp}
+      </Text>
     </View>);
   }
 }
