@@ -10,6 +10,8 @@ import IconMaterial from 'react-native-vector-icons/MaterialIcons';
 import Video from 'react-native-video';
 import DialogInput from 'react-native-dialog-input';
 
+import RNFetchBlob from 'rn-fetch-blob';
+
 var ImagePicker = NativeModules.ImageCropPicker;
 
 const styles = StyleSheet.create({
@@ -39,7 +41,7 @@ export default class App extends Component {
     this.state = {
       image: null,
       images: null,
-      apiIp: '192.168.2.130',
+      apiIp: '10.10.65.105',
       showApiIpDialog: false
     };
   }
@@ -209,17 +211,18 @@ export default class App extends Component {
       </ActionButton>
       <Button
         onPress={() => {
-         /* RNFetchBlob.config({
+          RNFetchBlob.config({
             trusty: true
           })
             .fetch('POST', 'https://' + this.state.apiIp + '/api/ocr', {
               'Content-Type': 'multipart/form-data'
             }, [
-                { name: 'data', filename: 'data.jpg', type: 'image/foo', data: RNFetchBlob.wrap(this.state.image) }
+                { name: 'image', filename: 'data.jpg', type: 'image/foo', data: RNFetchBlob.wrap(this.state.image.uri) }
               ]).then((resp) => {
+                Alert.alert('Response', JSON.stringify(resp));
               }).catch((err) => {
               })
-			  */
+			  
         }}
         title="Perform Recognition"
       />
