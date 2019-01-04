@@ -219,7 +219,7 @@ export default class App extends Component {
             }, [
                 { name: 'image', filename: 'data.jpg', type: 'image/foo', data: RNFetchBlob.wrap(this.state.image.uri) }
               ]).then((resp) => {
-                Alert.alert('Response', JSON.stringify(resp));
+                Alert.alert('Response', resp.data);
               }).catch((err) => {
               })
 			  
