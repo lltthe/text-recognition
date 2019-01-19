@@ -12,6 +12,8 @@ import DialogInput from 'react-native-dialog-input';
 
 import RNFetchBlob from 'rn-fetch-blob';
 
+import utf8 from 'utf8'
+
 var ImagePicker = NativeModules.ImageCropPicker;
 
 const styles = StyleSheet.create({
@@ -52,6 +54,8 @@ export default class App extends Component {
       width: 500,
       height: 100,
       includeExif: true,
+	  freeStyleCropEnabled: true,
+	  enableRotationGesture: true,
     }).then(image => {
       console.log('received image', image);
       this.setState({
@@ -80,6 +84,8 @@ export default class App extends Component {
 
     ImagePicker.openCropper({
       path: this.state.image.uri,
+	  freeStyleCropEnabled: true,
+	  enableRotationGesture: true,
       width: 500,
       height: 100
     }).then(image => {
@@ -100,6 +106,8 @@ export default class App extends Component {
       height: 100,
       cropping: cropit,
       cropperCircleOverlay: circular,
+	  freeStyleCropEnabled: true,
+	  enableRotationGesture: true,
       compressImageMaxWidth: 640,
       compressImageMaxHeight: 480,
       compressImageQuality: 0.5,
@@ -211,6 +219,8 @@ export default class App extends Component {
       </ActionButton>
       <Button
         onPress={() => {
+
+          
           RNFetchBlob.config({
             trusty: true
           })
@@ -219,9 +229,10 @@ export default class App extends Component {
             }, [
                 { name: 'image', filename: 'data.jpg', type: 'image/foo', data: RNFetchBlob.wrap(this.state.image.uri) }
               ]).then((resp) => {
-                Alert.alert('Response', resp.data);
+                Alert.alert('Response', utf8.decode(resp.data));
               }).catch((err) => {
               })
+          
 			  
         }}
         title="Perform Recognition"
