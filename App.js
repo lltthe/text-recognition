@@ -250,7 +250,11 @@ export default class App extends Component {
                       { name: 'image', filename: 'data.jpg', type: 'image/foo', data: RNFetchBlob.wrap(this.state.image.uri) }
                     ]).then((resp) => {
                       var tmp = JSON.parse(resp.data)
-                      this.setState({ algo1res: JSON.stringify(tmp.data) })
+                      tmp = tmp.data
+                      if (!tmp || tmp == '') {
+                        tmp = 'No result (due to not enough DPI)'
+                      }                    
+                      this.setState({ algo1res: tmp })
                       this.setState({ algo1running: false })
                     }).catch((err) => {
                     })
@@ -267,7 +271,11 @@ export default class App extends Component {
                       { name: 'image', filename: 'data.jpg', type: 'image/foo', data: RNFetchBlob.wrap(this.state.image.uri) }
                     ]).then((resp) => {
                       var tmp = JSON.parse(resp.data)
-                      this.setState({ algo2res: JSON.stringify(tmp.data) })
+                      tmp = tmp.data
+                      if (!tmp || tmp == '') {
+                        tmp = 'No result (due to not enough DPI)'
+                      }                    
+                      this.setState({ algo1res: tmp })
                       this.setState({ algo2running: false })
                     }).catch((err) => {
                     })
