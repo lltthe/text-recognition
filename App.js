@@ -10,10 +10,13 @@ import Video from 'react-native-video';
 import RNFetchBlob from 'rn-fetch-blob';
 import SpinnerButton from 'react-native-spinner-button';
 import DialogInput from 'react-native-dialog-input'
+import AsyncStorage from '@react-native-community/async-storage'
 
 var ImagePicker = NativeModules.ImageCropPicker;
 
 console.disableYellowBox = true
+
+const SERVER_KEY = 'server'
 
 const serverHeader = 'https://'
 
@@ -63,6 +66,12 @@ export default class App extends Component {
       server: '',
       showServerInput: false
     };
+  } 
+
+  componentWillMount() {
+    AsyncStorage.getItem(SERVER_KEY).then((val) => {
+      this.setState({ server: val })
+    })
   }
 
   pickSingleWithCamera(cropping) {
@@ -275,7 +284,7 @@ export default class App extends Component {
                       if (!tmp || tmp == '') {
                         tmp = 'No result (due to not enough DPI)'
                       }                    
-                      this.setState({ algo1res: tmp })
+                      this.setState({ algo2res: tmp })
                       this.setState({ algo2running: false })
                     }).catch((err) => {
                     })
@@ -291,8 +300,9 @@ export default class App extends Component {
         title={'Server Address Config'}
         message={'Input the server address (without http(s) header):'}
         initValueTextInput={this.state.server}
-        submitInput={(inp) => {
+        submitInput={async (inp) => {
           this.setState({ server: inp, showServerInput: false })
+          await AsyncStorage.setItem(SERVER_KEY, inp)
         }}
         closeDialog={() => {
           this.setState({ showServerInput: false })
